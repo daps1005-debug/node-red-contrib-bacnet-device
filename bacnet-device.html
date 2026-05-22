@@ -1,0 +1,111 @@
+<script type="text/javascript">
+
+RED.nodes.registerType('bacnet-device', {
+
+    category: 'network',
+    color: '#7bb0ff',
+
+    defaults: {
+        name: { value: "" },
+        ip: { value: "", required: true },
+        points: { value: [] }
+    },
+
+    inputs: 1,
+    outputs: 1,
+
+    icon: "font-awesome/fa-server",
+
+    label: function () {
+        return this.name || this.ip || "BACnet Device";
+    },
+
+    oneditprepare: function () {
+
+        const list = $("#node-input-points-container");
+
+        list.editableList({
+
+            addItem: function(container, index, data) {
+
+                data = data || {};
+
+                $('<input/>', {
+                    class: "node-input-point-name",
+                    type: "text",
+                    placeholder: "Name",
+                    style: "width:20%; margin-right:5px;"
+                }).val(data.name).appendTo(container);
+
+                $('<input/>', {
+                    class: "node-input-point-type",
+                    type: "number",
+                    placeholder: "Type",
+                    style: "width:15%; margin-right:5px;"
+                }).val(data.type).appendTo(container);
+
+                $('<input/>', {
+                    class: "node-input-point-instance",
+                    type: "number",
+                    placeholder: "Instance",
+                    style: "width:20%; margin-right:5px;"
+                }).val(data.instance).appendTo(container);
+
+                $('<input/>', {
+                    class: "node-input-point-property",
+                    type: "number",
+                    placeholder: "Property",
+                    style: "width:20%;"
+                }).val(data.property || 85).appendTo(container);
+            },
+
+            removable: true,
+            sortable: true
+        });
+
+        (this.points || []).forEach(point => {
+            list.editableList('addItem', point);
+        });
+    },
+
+    oneditsave: function() {
+
+        const points = [];
+
+        $("#node-input-points-container")
+            .editableList('items')
+            .each(function() {
+
+                const row = $(this);
+
+                points.push({
+                    name: row.find(".node-input-point-name").val(),
+                    type: parseInt(row.find(".node-input-point-type").val()),
+                    instance: parseInt(row.find(".node-input-point-instance").val()),
+                    property: parseInt(row.find(".node-input-point-property").val())
+                });
+            });
+
+        this.points = points;
+    }
+});
+
+</script>
+
+<script type="text/html" data-template-name="bacnet-device">
+
+    <div class="form-row">
+        <label>Name</label>
+        <input type="text" id="node-input-name">
+    </div>
+
+    <div class="form-row">
+        <label>IP</label>
+        <input type="text" id="node-input-ip">
+    </div>
+
+    <div class="form-row">
+        <ol id="node-input-points-container"></ol>
+    </div>
+
+</script>
